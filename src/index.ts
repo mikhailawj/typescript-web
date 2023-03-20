@@ -1,6 +1,12 @@
-import axios from "axios";
+import { UserEdit } from "./views/UserEdit";
 import { User } from "./models/User";
 
-const user = new User({ id: 1});
+const user = User.buildUser({ name: "NAME", age: 20 });
+const root = document.getElementById("root");
 
-user.fetch();
+if (root) {
+    const userEdit = new UserEdit(root, user);
+    userEdit.render();
+} else {
+    throw new Error("Root element not found");
+}

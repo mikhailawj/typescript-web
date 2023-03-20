@@ -1,37 +1,34 @@
-import axios, { AxiosResponse } from "axios";
+import { Model } from "./Model";
+import { Attributes } from "./Attributes";
+import { ApiSync } from "./ApiSync";
 import { Eventing } from "./Eventing";
+import { Collection } from "./Collection";
 
-interface UserProps {
+export interface UserProps {
     id?: number;
     name?: string;
     age?: number;
 }
 
-export class User {
-    constructor(private data: UserProps) {}
+const rootUrl = "http://localhost:3000/users";
 
-    get(propName: string): number | string {
-        return this.data[propName];
+export class User extends Model<UserProps> {
+    static buildUser(attrs: UserProps) {
+        return new User(
+            new Attributes<UserProps>(attrs),
+            new Eventing(),
+            new ApiSync<UserProps>(rootUrl)
+        );
     }
 
-    set(update: UserProps): void {
-        Object.assign(this.data, update);
+    static buildUserCollection(): Collection<User, UserProps> {
+        return new Collection<User, UserProps>(rootUrl, (json: UserProps) =>
+            User.buildUser(json)
+        );
     }
 
-    fetch(): void {
-        axios
-            .get(`http://localhost:3000/users/${this.get("id")}`)
-            .then((res: AxiosResponse): void => {
-                this.set(res.data);
-            });
-    }
-
-    save(): void {
-        const id = this.get("id");
-        if (id) {
-            axios.put(`http://localhost:3000/users/${id}`, this.data);
-        } else {
-            axios.post("http://localhost:3000/users", this.data);
-        }
+    setRandomAge(): void {
+        const age = Math.round(Math.random() * 100);
+        this.set({ age });
     }
 }
